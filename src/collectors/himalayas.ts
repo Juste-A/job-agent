@@ -39,11 +39,13 @@ function toJob(raw: HimalayasJob): Job {
     tags: raw.categories
   }
 }
+
 // The shape of the whole response
 interface HimalayasSearchResponse {
   totalCount: number
   jobs: HimalayasJob[]
 }
+
 // The collector
 export async function fetchHimalayas(keyword: string, page = 1): Promise<Job[]> {
   // Build the URL
@@ -62,4 +64,27 @@ export async function fetchHimalayas(keyword: string, page = 1): Promise<Job[]> 
   const data = (await response.json()) as HimalayasSearchResponse
   // Convert every raw job into Job shape
   return data.jobs.map(toJob)
+}
+
+// Pause for a given number of milliseconds
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+export async function fetchAllHimalayas(keyword: string, maxPages = 5): Promise<Job[]> {
+  const allJobs: Job[] = []
+
+  for (let page = 1; page <= maxPages; page++) {
+    // await here used to avoid triggering rate limits
+    const jobs = await fetchHimalayas(keyword, page)
+    allJobs.push(...jobs)
+
+    console.log(`Page ${page}: ${jobs.length} jobs`)
+
+    // Last page reached: fewer than a full page came back
+    if (jobs.length < 20) break
+
+    // Wait 1 second before the next request
+    await sleep(1000)
+  }
+
+  return allJobs
 }

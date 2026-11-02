@@ -1,6 +1,6 @@
-import { fetchHimalayas } from './collectors/himalayas.js'
+import { fetchAllHimalayas } from './collectors/himalayas.js'
 
-const jobs = await fetchHimalayas('vue')
+const jobs = await fetchAllHimalayas('vue')
 
 console.log(`Found ${jobs.length} jobs\n`)
 
